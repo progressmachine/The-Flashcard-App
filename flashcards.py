@@ -1,4 +1,8 @@
+# pip3 install pyttsx3
+
 import os
+import pyttsx3
+import random
 
 flashcard_file = "flashcards.txt"
 flashcards = {}
@@ -96,6 +100,39 @@ def import_flashcards():
     except Exception as e:
         print(f"Error importing flashcards: {e}")
 
+def practice_flashcards():
+
+    engine = pyttsx3.init()
+
+    voices = engine.getProperty('voices')
+
+    for voice in voices:
+        if any("de" in lang.lower() for lang in voice.languages) or "german" in voice.name.lower():
+            engine.setProperty('voice', voice.id)
+            break
+
+    if not flashcards:
+        print("No flashcards to practice.")
+        return
+
+    items = list(flashcards.items()) # flashcards.items() gives you all key-value pairs (question-answer pairs) from the flashcards dictionary as (key, value) tuples.
+    # list(...) converts this into a regular list of tuples.
+    random.shuffle(items)
+
+    print("\n=== Practice Mode ===")
+    print("Press Enter to see the answer. Enter 'q' to quit.\n")
+
+    for i, (question, answer) in enumerate(items, 1):
+        print(f"{i}. Question: {question}")
+        engine.say(question)
+        engine.runAndWait()
+        user_input = input().strip().lower()
+        if user_input == 'q':
+            print("Exiting practice mode.")
+            break
+        print(f"   Answer: {answer}")
+        input()
+        
 # Show menu
 def main_menu():
     while True:
@@ -106,9 +143,11 @@ def main_menu():
         print("4. View Flashcards")
         print("5. Export Flashcards")
         print("6. Import Flashcards")
-        print("7. Exit")
+        print("7. Practice Flashcards")
+        print("8. Exit")
 
-        choice = input("Enter your choice (1-7): ").strip()
+
+        choice = input("Enter your choice (1-8): ").strip()
 
         if choice == "1":
             add_flashcard()
@@ -123,10 +162,12 @@ def main_menu():
         elif choice == "6":
             import_flashcards()
         elif choice == "7":
+            practice_flashcards()
+        elif choice == "8":
             print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please enter a number between 1 and 7.")
+            print("Invalid choice. Please enter a number between 1 and 8.")
 
 # Run app
 if __name__ == "__main__":
